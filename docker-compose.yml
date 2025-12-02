@@ -18,7 +18,7 @@ services:
     env_file:
       - .env
     working_dir: /app
-    command: sh
+    command: bash
 
   # Claude Code - run prompts (print mode)
   claude-prompt:
@@ -55,7 +55,7 @@ services:
     env_file:
       - .env
     working_dir: /app
-    command: sh
+    command: bash
 
   # OpenCode - run prompts
   opencode-run:
@@ -71,7 +71,7 @@ services:
     working_dir: /app
     profiles:
       - opencode
-    entrypoint: ["opencode", "run"]
+    entrypoint: ["opencode", "run", "-m", "anthropic/claude-sonnet-4-20250514"]
 
   # OpenCode - continue session
   opencode-continue:
@@ -87,4 +87,4 @@ services:
     working_dir: /app
     profiles:
       - opencode
-    entrypoint: ["opencode", "run", "-c"]
+    entrypoint: ["opencode", "run", "-m", "anthropic/claude-sonnet-4-20250514", "-c"]

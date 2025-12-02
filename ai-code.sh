@@ -122,7 +122,7 @@ opencode_run() {
         echo "Usage: $0 opencode run 'your prompt here'"
         exit 1
     fi
-    docker compose run --rm opencode-run "$prompt"
+    docker compose run --rm opencode sh -c "opencode run -m anthropic/claude-sonnet-4-20250514 '$prompt'"
 }
 
 opencode_shell() {
@@ -160,7 +160,7 @@ opencode_list() {
 opencode_continue() {
     local prompt="${1:-continue from where we left off}"
     echo "Continuing OpenCode session..."
-    docker compose run --rm opencode-continue "$prompt"
+    docker compose run --rm opencode sh -c "opencode run -m anthropic/claude-sonnet-4-20250514 -c '$prompt'"
 }
 
 opencode_resume() {
@@ -171,7 +171,7 @@ opencode_resume() {
         opencode_continue "$prompt"
     else
         echo "Resuming OpenCode session: $session_id"
-        docker compose run --rm opencode sh -c "opencode run -s '$session_id' '$prompt'"
+        docker compose run --rm opencode sh -c "opencode run -m anthropic/claude-sonnet-4-20250514 -s '$session_id' '$prompt'"
     fi
 }
 
