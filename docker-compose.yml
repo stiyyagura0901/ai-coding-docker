@@ -1,0 +1,71 @@
+services:
+  # Main service - interactive shell
+  claude:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: claude-code-docker
+    container_name: claude-code
+    stdin_open: true
+    tty: true
+    volumes:
+      # Mount current directory as workspace
+      - .:/app
+      # Persist Claude sessions
+      - ./.claude-sessions:/home/claude/.claude
+    env_file:
+      - .env
+    working_dir: /app
+    command: sh
+
+  # Service for running prompts (print mode)
+  claude-prompt:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: claude-code-docker
+    volumes:
+      - .:/app
+      - ./.claude-sessions:/home/claude/.claude
+    env_file:
+      - .env
+    working_dir: /app
+    profiles:
+      - prompt
+    entrypoint: ["claude", "--dangerously-skip-permissions", "-p"]
+
+  # Service for resuming sessions with a prompt
+  claude-resume:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: claude-code-docker
+    volumes:
+      - .:/app
+      - ./.claude-sessions:/home/claude/.claude
+    env_file:
+      - .env
+    working_dir: /app
+    profiles:
+      - resume
+    entrypoint: ["sh", "-c"]
+    command: ["claude --dangerously-skip-permissions -r $0 -p \"$1\""]
+
+  # Service for interactive resume
+  claude-resume-interactive:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: claude-code-docker
+    stdin_open: true
+    tty: true
+    volumes:
+      - .:/app
+      - ./.claude-sessions:/home/claude/.claude
+    env_file:
+      - .env
+    working_dir: /app
+    profiles:
+      - resume-interactive
+    entrypoint: ["claude", "--dangerously-skip-permissions", "-r"]
+
