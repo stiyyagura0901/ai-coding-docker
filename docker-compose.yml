@@ -1,71 +1,90 @@
 services:
-  # Main service - interactive shell
+  # ============================================
+  # CLAUDE CODE SERVICES
+  # ============================================
+  
+  # Claude Code - interactive shell
   claude:
     build:
       context: .
       dockerfile: Dockerfile
-    image: claude-code-docker
+    image: ai-coding-docker
     container_name: claude-code
     stdin_open: true
     tty: true
     volumes:
-      # Mount current directory as workspace
       - .:/app
-      # Persist Claude sessions
-      - ./.claude-sessions:/home/claude/.claude
+      - ./.claude-sessions:/home/coder/.claude
     env_file:
       - .env
     working_dir: /app
     command: sh
 
-  # Service for running prompts (print mode)
+  # Claude Code - run prompts (print mode)
   claude-prompt:
     build:
       context: .
       dockerfile: Dockerfile
-    image: claude-code-docker
+    image: ai-coding-docker
     volumes:
       - .:/app
-      - ./.claude-sessions:/home/claude/.claude
+      - ./.claude-sessions:/home/coder/.claude
     env_file:
       - .env
     working_dir: /app
     profiles:
-      - prompt
+      - claude
     entrypoint: ["claude", "--dangerously-skip-permissions", "-p"]
 
-  # Service for resuming sessions with a prompt
-  claude-resume:
+  # ============================================
+  # OPENCODE SERVICES
+  # ============================================
+  
+  # OpenCode - interactive shell
+  opencode:
     build:
       context: .
       dockerfile: Dockerfile
-    image: claude-code-docker
-    volumes:
-      - .:/app
-      - ./.claude-sessions:/home/claude/.claude
-    env_file:
-      - .env
-    working_dir: /app
-    profiles:
-      - resume
-    entrypoint: ["sh", "-c"]
-    command: ["claude --dangerously-skip-permissions -r $0 -p \"$1\""]
-
-  # Service for interactive resume
-  claude-resume-interactive:
-    build:
-      context: .
-      dockerfile: Dockerfile
-    image: claude-code-docker
+    image: ai-coding-docker
+    container_name: opencode
     stdin_open: true
     tty: true
     volumes:
       - .:/app
-      - ./.claude-sessions:/home/claude/.claude
+      - ./.opencode-sessions:/home/coder/.local/share/opencode
+    env_file:
+      - .env
+    working_dir: /app
+    command: sh
+
+  # OpenCode - run prompts
+  opencode-run:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: ai-coding-docker
+    volumes:
+      - .:/app
+      - ./.opencode-sessions:/home/coder/.local/share/opencode
     env_file:
       - .env
     working_dir: /app
     profiles:
-      - resume-interactive
-    entrypoint: ["claude", "--dangerously-skip-permissions", "-r"]
+      - opencode
+    entrypoint: ["opencode", "run"]
 
+  # OpenCode - continue session
+  opencode-continue:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: ai-coding-docker
+    volumes:
+      - .:/app
+      - ./.opencode-sessions:/home/coder/.local/share/opencode
+    env_file:
+      - .env
+    working_dir: /app
+    profiles:
+      - opencode
+    entrypoint: ["opencode", "run", "-c"]
